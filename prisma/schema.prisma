@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum TrxType {
+  TOPUP
+  PURCHASE
+}
+
+enum TrxStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  name         String
+  email        String        @unique
+  password     String
+  balance      Int           @default(0)
+  role         Role          @default(USER)
+  createdAt    DateTime      @default(now())
+  transactions Transaction[]
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  price       Int
+  category    String
+  image       String?
+  createdAt   DateTime @default(now())
+}
+
+model Transaction {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  type      TrxType
+  method    String?
+  amount    Int
+  status    TrxStatus @default(PENDING)
+  note      String?
+  createdAt DateTime  @default(now())
+}
